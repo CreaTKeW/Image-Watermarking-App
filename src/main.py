@@ -1,3 +1,6 @@
+from ui import main_window
+import tkinter as tk
+
 """
 
 -------------- File description
@@ -21,3 +24,7 @@ For image processing pillow module will be used
 
 """
 
+if __name__ == '__main__':
+    root = tk.Tk()
+    app = main_window.App(root)
+    root.mainloop()
