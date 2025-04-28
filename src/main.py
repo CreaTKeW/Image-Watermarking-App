@@ -18,7 +18,7 @@ The output will be a photo with a watermark on it
 Special functionalities can be added in the future
 
 For GUI tkinter module will be used
-It will create a window with an ability to display and accept picture files ex. .jpg .png .jpeg
+It will create a window with an ability to display and accept images
 
 For image processing pillow module will be used
 
