@@ -1,5 +1,4 @@
 import tkinter as tk
-import sys
 from tkinter import ttk, filedialog, messagebox
 from PIL import Image, ImageTk, UnidentifiedImageError
 from src.core import logic
@@ -34,6 +33,7 @@ class App:
 
         # A reference to PhotoImage constructor is required so it won't be deleted by garbage collector
         self.tk_image = None
+        self.watermarked_image = None
 
         # if starting image path exists then pass it as a variable
         if self.image_path:
@@ -56,7 +56,7 @@ class App:
         add_watermark_button = ttk.Button(mainframe, text='Add watermark', command=self.add_watermark)
         add_watermark_button.grid(column=1, row=3, sticky=(tk.W, tk.E))
 
-        save_image_button = ttk.Button(mainframe, text='Save changes', command=self.save_image)
+        save_image_button = ttk.Button(mainframe, text='Save changes', command= lambda : self.save_image())
         save_image_button.grid(column=0, row=4, sticky=(tk.W, tk.E))
 
         watermark_settings_button = ttk.Button(mainframe, text='Settings')
@@ -104,7 +104,7 @@ class App:
             self.image_to_save = filepath
             self.tk_image = ImageTk.PhotoImage(resized_image)
             self.image_label.configure(image=self.tk_image)
-            #self.image_path = filepath
+            self.image_path = filepath
 
     def add_watermark(self):
         if not self.image_path:
@@ -120,6 +120,18 @@ class App:
         self.display_image(self.watermarked_image)
 
     def save_image(self):
-        # TODO: Implement save image method
+        files = [('PNG files', '*.png'),
+                 ('JPEG files', '*.jpg *.jpeg'),
+                 ('BMP files', '*.bmp'),
+                 ('GIF files', '*.gif'),
+                 ('All files', '*.*')]
+
+        # Opens dialog window and saves images on chosen filepath
+        filepath = filedialog.asksaveasfilename(title='Save as', filetypes=files, defaultextension='.png')
+        if not filepath:
+            return
+
+        self.watermarked_image.save(filepath)
+
+    def settings_window(self):
         pass
-        #self.watermarked_image.save()
