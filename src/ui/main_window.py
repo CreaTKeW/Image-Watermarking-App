@@ -1,11 +1,15 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+import ttkbootstrap as ttk
+from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk, UnidentifiedImageError
+from src.ui.settings_window import Settings
 from src.core import logic
+from ttkbootstrap.constants import *
 
 
 class App:
     def __init__(self, root):
+        self.root = root
         root.title('Markapp')
 
         # Setup mainframe as content frame holder
@@ -14,22 +18,23 @@ class App:
 
         # Keeps the layout responsive to width/height changes
         # The image size is fixed so it won't change
-        for i in range(2):
-            root.columnconfigure(i, weight=1)
-            root.rowconfigure(i, weight=1)
+        root.rowconfigure(0, weight=1)
+        root.columnconfigure(0, weight=1)
+        mainframe.rowconfigure(0, weight=1)
+
+        for i in range(4):
             mainframe.columnconfigure(i, weight=1)
-            mainframe.rowconfigure(i, weight=1)
 
         # Path to example photo from resources directory
         self.image_path = '../resources/example.jpg'
 
         # Image size // Width x Height
-        self.image_width = 500
-        self.image_height = 400
+        self.image_width = 900
+        self.image_height = 550
 
         # To display image TKinter requires to put it inside a Label
         self.image_label = ttk.Label(mainframe)
-        self.image_label.grid(column=0, row=0, columnspan=2, pady=(0, 10))
+        self.image_label.grid(column=0, row=0, columnspan=4, pady=(0, 10))
 
         # A reference to PhotoImage constructor is required so it won't be deleted by garbage collector
         self.tk_image = None
@@ -44,23 +49,25 @@ class App:
         water_label.config(font=('Arial', 18))
 
         self.watermark_text_entry = ttk.Entry(mainframe)
-        self.watermark_text_entry.grid(column=0, row=2, columnspan=2, sticky=(tk.W, tk.E))
+        self.watermark_text_entry.grid(column=0, row=2, columnspan=4, sticky=(tk.W, tk.E))
         self.watermark_text_entry.config(font=('Arial', 18))
 
         # In order to change ttk button style we need to configure ttk.Style() class
         ttk.Style().configure("TButton", padding=6, relief="flat", font=('Arial', 16))
 
-        file_button = ttk.Button(mainframe, text='Choose image', command=self.open_file)
-        file_button.grid(column=0, row=3, sticky=(tk.W, tk.E))
+        file_button = ttk.Button(mainframe, text='Choose image', command=self.open_file, bootstyle=(INFO, OUTLINE))
+        file_button.grid(column=0, row=3, sticky=(tk.W, tk.E), padx=(0, 5), pady=(10, 0))
 
-        add_watermark_button = ttk.Button(mainframe, text='Add watermark', command=self.add_watermark)
-        add_watermark_button.grid(column=1, row=3, sticky=(tk.W, tk.E))
+        add_watermark_button = ttk.Button(mainframe, text='Add watermark', command=self.add_watermark, bootstyle=(INFO, OUTLINE))
+        add_watermark_button.grid(column=1, row=3, sticky=(tk.W, tk.E), padx=(0, 5), pady=(10, 0))
 
-        save_image_button = ttk.Button(mainframe, text='Save changes', command= lambda : self.save_image())
-        save_image_button.grid(column=0, row=4, sticky=(tk.W, tk.E))
+        save_image_button = ttk.Button(mainframe, text='Save changes', command= lambda : self.save_image(), bootstyle=(INFO, OUTLINE))
+        save_image_button.grid(column=2, row=3, sticky=(tk.W, tk.E), padx=(0, 5), pady=(10, 0))
 
-        watermark_settings_button = ttk.Button(mainframe, text='Settings')
-        watermark_settings_button.grid(column=1, row=4, sticky=(tk.W, tk.E))
+        watermark_settings_button = ttk.Button(mainframe, text='Settings', command=self.settings_window, bootstyle=(INFO, OUTLINE))
+        watermark_settings_button.grid(column=3, row=3, sticky=(tk.W, tk.E), padx=(0, 5), pady=(10, 0))
+
+        #buttons_frame = ttk.Frame()
 
     def open_file(self):
         # Open file dialog and wait until a file is chosen
@@ -134,4 +141,4 @@ class App:
         self.watermarked_image.save(filepath)
 
     def settings_window(self):
-        pass
+        settings = Settings(self.root)
