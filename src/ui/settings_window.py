@@ -1,11 +1,12 @@
+import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.dialogs.colorchooser import ColorChooserDialog
 from ttkbootstrap.dialogs.dialogs import FontDialog
 from ttkbootstrap.constants import *
-from PIL import ImageFont
 
 class Settings:
-    def __init__(self, parent):
+    def __init__(self, parent, app_logic):
+        self.app_logic = app_logic
         self.top = ttk.Toplevel(parent)
         self.top.title('Settings')
         self.top.place_window_center()
@@ -21,17 +22,29 @@ class Settings:
 
         color_button = ttk.Button(mainframe, text='Text Color', command=self.color_dialog, style=(LIGHT, OUTLINE))
         font_button = ttk.Button(mainframe, text='Text Font', command=self.font_dialog, style=(LIGHT, OUTLINE))
-        apply_button = ttk.Button(mainframe, text='Apply', command=self.apply_settings, style=INFO)
+        mark_menu_button = ttk.Menubutton(mainframe, text='Watermark placement', style='Light.Outline.TMenubutton')
+        apply_button = ttk.Button(mainframe, text='Apply', command=self.app_logic.apply_settings, style=INFO)
         cancel_button = ttk.Button(mainframe, text='Cancel', command=self.cancel, style=INFO)
 
         mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
         color_button.grid(column=0, row=0, sticky=(W, E), padx=(0, 5), pady=(10, 0))
         font_button.grid(column=0, row=1, sticky=(W, E), padx=(0, 5), pady=(10, 0))
-        apply_button.grid(column=0, row=2, sticky=(W, E), padx=(0, 5), pady=(10, 0))
-        cancel_button.grid(column=1, row=2, sticky=(W, E), padx=(5, 0), pady=(10, 0))
+        mark_menu_button.grid(column=0, row=2, columnspan=2, sticky=(W, E), padx=(0, 5), pady=(10, 0))
+        apply_button.grid(column=0, row=3, sticky=(W, E), padx=(0, 5), pady=(10, 0))
+        cancel_button.grid(column=1, row=3, sticky=(W, E), padx=(5, 0), pady=(10, 0))
 
-        self.color = (255, 255, 255)
-        self.font = ImageFont.truetype('arial.ttf', 18)
+        mark_menu = tk.Menu(mark_menu_button)
+
+        placement_options = ['bottom-left', 'top-left', 'center', 'bottom-right', 'top-right']
+
+        option_var = tk.StringVar()
+        for option in placement_options:
+            mark_menu.add_radiobutton(label=option, value=option, variable=option_var)
+
+        mark_menu_button['menu'] = mark_menu
+
+        self.color = None
+        self.font = None
 
     def color_dialog(self):
         cd = ColorChooserDialog()
@@ -40,6 +53,7 @@ class Settings:
         colors = cd.result
         if colors:
             self.color = colors.rgb
+        self.top.grab_set()
 
     def font_dialog(self):
         fd = FontDialog()
@@ -48,9 +62,9 @@ class Settings:
         font = fd.result
         if font:
             self.font = font
+        self.top.grab_set()
 
     def apply_settings(self):
-        print("Successfully applied new settings")
         self.top.grab_release()
         self.top.destroy()
 
