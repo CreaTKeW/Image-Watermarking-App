@@ -1,3 +1,5 @@
+import matplotlib.font_manager as fm
+from matplotlib.font_manager import FontProperties
 from PIL import Image, ImageTk, ImageDraw, ImageFont, UnidentifiedImageError
 from ttkbootstrap.dialogs.dialogs import Messagebox
 from src.ui.settings_window import Settings
@@ -16,8 +18,9 @@ class Logic:
         self.image_height = 550
 
         self.settings = None
+        self.tk_font = None
         self.font = None
-        self.color = (255, 255, 255)
+        self.color = None
 
     def add_watermark_text(self, text: str,
                            image_path: str,
@@ -34,7 +37,7 @@ class Logic:
                     try:
                         font = ImageFont.truetype('arial.ttf', size=im.size[1] * 0.05)
                     except IOError:
-                        font = ImageFont.load_default()
+                        font = ImageFont.load_default(size=30)
 
                 # TODO: Replace this with a input argument using ttk.Menubutton
                 bl_mark = (im.size[0] * 0.01, im.size[1] * 0.9)
@@ -107,7 +110,7 @@ class Logic:
             Messagebox.show_warning(message='Enter watermark text.', title='Text is null.', parent=self.main_root, alert=True)
             return
 
-        self.watermarked_image = self.add_watermark_text(watermark_text, self.image_path, font=self.font, color=self.color)
+        self.watermarked_image = self.add_watermark_text(watermark_text, self.image_path, font=self.font, color=self.color.rgb)
         self.display_image(self.watermarked_image)
 
     def save_image(self):
@@ -131,8 +134,33 @@ class Logic:
         self.settings = Settings(self.main_root, self)
 
     def apply_settings(self):
-        self.font = self.settings.font
-        self.color = self.settings.color
+        self.tk_font = self.font
+        self.color = self.color
 
         self.settings.apply_settings()
-        print(f'Successfully applied settings: color: {self.color}, font: {self.font}')
+        self.font = self.tkinter_font_to_pillow_font(self.tk_font)
+        print(f'Successfully applied settings: color: {self.color}, font: {self.tk_font}')
+
+    def tkinter_font_to_pillow_font(self, tk_font):
+        try:
+            family = tk_font.actual('family')
+            size = tk_font.actual('size')
+            weight = tk_font.actual('weight')
+            slant = tk_font.actual('slant')
+
+            style = 'italic' if slant == 'italic' else 'normal'
+
+            try:
+                font_props = FontProperties(family=family, weight=weight, style=style)
+                font_path = fm.findfont(font_props, fallback_to_default=True)
+
+                pillow_font = ImageFont.truetype(font_path, size)
+                return pillow_font
+
+            except Exception as e:
+                Messagebox.show_error(message=f"Error: Couldn't find font: '{family}' (weight: {weight}, style: {style}). Description: {e}")
+                return ImageFont.load_default(size=30)
+
+        except AttributeError:
+            Messagebox.show_info(message='Font wasn\'t provided. Loading default font.')
+            return ImageFont.load_default(size=30)
