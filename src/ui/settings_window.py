@@ -27,7 +27,7 @@ class Settings:
         color_button = ttk.Button(mainframe, text='Text Color', command=self.color_dialog, style=(LIGHT, OUTLINE))
         font_button = ttk.Button(mainframe, text='Text Font', command=self.font_dialog, style=(LIGHT, OUTLINE))
         self.color_preview = ttk.Frame(mainframe, width=100, height=50, relief='ridge', borderwidth=2, style=self.preview_style_name)
-        self.font_preview = ttk.Label(mainframe, text='Hello World!', font=self.app_logic.tk_font)
+        self.font_preview = ttk.Label(mainframe, text='Hello World!', font=self.app_logic.display_font)
         mark_menu_button = ttk.Menubutton(mainframe, text='Watermark placement', style='Light.Outline.TMenubutton')
         apply_button = ttk.Button(mainframe, text='Apply', command=self.app_logic.apply_settings, style=INFO)
         cancel_button = ttk.Button(mainframe, text='Cancel', command=self.cancel, style=INFO)
@@ -44,7 +44,7 @@ class Settings:
         mark_menu = tk.Menu(mark_menu_button)
         placement_options = ['bottom-left', 'top-left', 'center', 'bottom-right', 'top-right']
         self.option_var = tk.StringVar()
-        self.option_var.set('bottom-left')
+        self.option_var.set(str(self.app_logic.text_position))
         for option in placement_options:
             mark_menu.add_radiobutton(label=option, value=option, variable=self.option_var)
         mark_menu_button['menu'] = mark_menu
@@ -65,6 +65,7 @@ class Settings:
 
         font = fd.result
         if font:
+            self.app_logic.display_font = font
             self.app_logic.font = font
             self.font_preview.config(font=font)
         self.top.grab_set()

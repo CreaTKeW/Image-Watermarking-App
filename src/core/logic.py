@@ -18,10 +18,11 @@ class Logic:
         self.image_height = 550
 
         self.settings = None
+        self.display_font = None
         self.tk_font = None
         self.font = None
         self.color = None
-        self.text_positon = None
+        self.text_position = None
 
     def add_watermark_text(self, text: str,
                            image_path: str,
@@ -130,7 +131,7 @@ class Logic:
         else:
             watermark_color = self.color.rgb
 
-        self.watermarked_image = self.add_watermark_text(watermark_text, self.image_path, position=self.text_positon, font=self.font, color=watermark_color)
+        self.watermarked_image = self.add_watermark_text(watermark_text, self.image_path, position=self.text_position, font=self.font, color=watermark_color)
         self.display_image(self.watermarked_image)
 
     def save_image(self):
@@ -145,7 +146,11 @@ class Logic:
             return
 
         try:
-            self.watermarked_image.save(filepath)
+            if self.watermarked_image is None:
+                with Image.open(self.image_path) as im:
+                    im.save(filepath)
+            else:
+                self.watermarked_image.save(filepath)
             Messagebox.ok(message=f'Your photo has been successfully saved.', title='Success', alert=False, parent=self.main_root)
         except AttributeError:
             Messagebox.show_error(message='Failed saving photo.', title='Failed', alert=True, parent=self.main_root)
@@ -154,14 +159,14 @@ class Logic:
         self.settings = Settings(self.main_root, self)
 
     def apply_settings(self):
-        self.tk_font = self.font
+        self.tk_font = self.display_font
         self.color = self.color
-        self.text_positon = self.settings.option_var.get()
-        print(self.text_positon)
+        self.text_position = self.settings.option_var.get()
+        print(self.text_position)
 
         self.settings.apply_settings()
         self.font = self.tkinter_font_to_pillow_font(self.tk_font)
-        print(f'Successfully applied settings: color: {self.color}, font: {self.tk_font}, position: {self.text_positon}')
+        print(f'Successfully applied settings: color: {self.color}, font: {self.tk_font}, position: {self.text_position}')
 
     def tkinter_font_to_pillow_font(self, tk_font):
         try:
