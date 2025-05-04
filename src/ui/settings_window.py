@@ -43,9 +43,10 @@ class Settings:
 
         mark_menu = tk.Menu(mark_menu_button)
         placement_options = ['bottom-left', 'top-left', 'center', 'bottom-right', 'top-right']
-        option_var = tk.StringVar()
+        self.option_var = tk.StringVar()
+        self.option_var.set('bottom-left')
         for option in placement_options:
-            mark_menu.add_radiobutton(label=option, value=option, variable=option_var)
+            mark_menu.add_radiobutton(label=option, value=option, variable=self.option_var)
         mark_menu_button['menu'] = mark_menu
 
     def color_dialog(self):

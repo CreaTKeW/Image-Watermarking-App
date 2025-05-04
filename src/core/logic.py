@@ -21,10 +21,11 @@ class Logic:
         self.tk_font = None
         self.font = None
         self.color = None
+        self.text_positon = None
 
     def add_watermark_text(self, text: str,
                            image_path: str,
-                           position: str = 'bottom-left',
+                           position: str,
                            font: ImageFont.ImageFont | None = None,
                            color: tuple[int, int, int] = (255, 255, 255)) -> Image.Image | None:
 
@@ -39,15 +40,28 @@ class Logic:
                     except IOError:
                         font = ImageFont.load_default(size=30)
 
-                # TODO: Replace this with a input argument using ttk.Menubutton
-                bl_mark = (im.size[0] * 0.01, im.size[1] * 0.9)
-                tl_mark = (im.size[0] * 0.01, im.size[1] * 0.01)
-                center_mark = (im.size[0] * 0.5, im.size[1] * 0.5)
+                bl_pos = (im.size[0] * 0.01, im.size[1] * 0.9)
+                tl_pos = (im.size[0] * 0.01, im.size[1] * 0.01)
+                center_pos = (im.size[0] * 0.5, im.size[1] * 0.5)
+                br_pos = (im.size[0] * 0.9, im.size[1] * 0.9)
+                tr_pos = (im.size[0] * 0.9, im.size[1] * 0.01)
+                mark_pos = None
 
-                if position == 'bottom-left':
-                    mark_position = bl_mark
+                position_dict = {
+                    'bottom-left': bl_pos,
+                    'top-left': tl_pos,
+                    'center': center_pos,
+                    'bottom-right': br_pos,
+                    'top-right': tr_pos
+                }
 
-                draw.text(text=text, xy=mark_position, font=font, fill=color)
+                try:
+                    mark_pos = position_dict[position]
+                except KeyError:
+                    Messagebox.show_info(message='Position not found. Applying default position: bottom-left', title='Info', parent=self.main_root)
+                    mark_pos = position_dict['bottom-left']
+
+                draw.text(text=text, xy=mark_pos, font=font, fill=color)
                 return image_to_edit
 
         except IOError as e:
@@ -110,7 +124,13 @@ class Logic:
             Messagebox.show_warning(message='Enter watermark text.', title='Text is null.', parent=self.main_root, alert=True)
             return
 
-        self.watermarked_image = self.add_watermark_text(watermark_text, self.image_path, font=self.font, color=self.color.rgb)
+
+        if self.color is None:
+            watermark_color = self.color
+        else:
+            watermark_color = self.color.rgb
+
+        self.watermarked_image = self.add_watermark_text(watermark_text, self.image_path, position=self.text_positon, font=self.font, color=watermark_color)
         self.display_image(self.watermarked_image)
 
     def save_image(self):
@@ -136,10 +156,12 @@ class Logic:
     def apply_settings(self):
         self.tk_font = self.font
         self.color = self.color
+        self.text_positon = self.settings.option_var.get()
+        print(self.text_positon)
 
         self.settings.apply_settings()
         self.font = self.tkinter_font_to_pillow_font(self.tk_font)
-        print(f'Successfully applied settings: color: {self.color}, font: {self.tk_font}')
+        print(f'Successfully applied settings: color: {self.color}, font: {self.tk_font}, position: {self.text_positon}')
 
     def tkinter_font_to_pillow_font(self, tk_font):
         try:
@@ -151,7 +173,7 @@ class Logic:
             style = 'italic' if slant == 'italic' else 'normal'
 
             try:
-                font_props = FontProperties(family=family, weight=weight, style=style)
+                font_props = FontProperties(family=family, weight=weight, style=style, size=size)
                 font_path = fm.findfont(font_props, fallback_to_default=True)
 
                 pillow_font = ImageFont.truetype(font_path, size)
